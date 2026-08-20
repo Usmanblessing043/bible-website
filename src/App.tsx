@@ -14,6 +14,7 @@ import { DailyDevotionalModal } from './components/DailyDevotionalModal';
 import { ReaderSettingsDrawer } from './components/ReaderSettingsDrawer';
 import { VerseActionToolbar } from './components/VerseActionToolbar';
 import { AudioPlayerBar } from './components/AudioPlayerBar';
+import { BottomNav } from './components/BottomNav';
 
 import { 
   BibleBook, 
@@ -433,9 +434,10 @@ export default function App() {
         onOpenSearch={() => setSearchOpen(true)}
         onOpenLibrary={() => setLibraryOpen(true)}
         onOpenReadingPlans={() => setPlansOpen(true)}
-        onOpenDevotional={() => setDevotionalOpen(true)}
+        onOpenDailyVerse={() => setDevotionalOpen(true)}
         onOpenAiAssistant={() => setAiAssistantOpen(true)}
         onOpenSettings={() => setSettingsOpen(true)}
+        onToggleSplitView={() => handleUpdateSettings({ splitView: !settings.splitView })}
         onToggleAudio={() => {
           if (isPlayingAudio) {
             handlePauseAudio();
@@ -445,6 +447,7 @@ export default function App() {
         }}
         isPlayingAudio={isPlayingAudio}
         settings={settings}
+        onUpdateSettings={handleUpdateSettings}
       />
 
       {/* Main Scripture Reader Area */}
@@ -499,6 +502,7 @@ export default function App() {
         }}
         onClearSelection={handleClearSelection}
         settings={settings}
+        isAudioBarActive={isPlayingAudio || activeAudioVerse !== null}
       />
 
       {/* Fixed Audio Player Bar (Appears during spoken recitation) */}
@@ -515,6 +519,16 @@ export default function App() {
         onPrevVerse={handlePrevAudioVerse}
         settings={settings}
         onUpdateRate={(rate) => handleUpdateSettings({ audioRate: rate })}
+      />
+
+      {/* Mobile Bottom Navigation Bar (md:hidden) */}
+      <BottomNav
+        onOpenBooks={() => setBookSelectorOpen(true)}
+        onOpenDailyVerse={() => setDevotionalOpen(true)}
+        onOpenAiAssistant={() => setAiAssistantOpen(true)}
+        onOpenReadingPlans={() => setPlansOpen(true)}
+        onOpenLibrary={() => setLibraryOpen(true)}
+        settings={settings}
       />
 
       {/* Modals and Side Drawers */}

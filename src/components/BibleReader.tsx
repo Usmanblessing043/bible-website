@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -7,8 +7,8 @@ import {
   Volume2, 
   Sparkles,
   RefreshCw,
-  Eye,
-  Info
+  Info,
+  Columns
 } from 'lucide-react';
 import { 
   BibleChapter, 
@@ -62,6 +62,7 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
   onRetry,
 }) => {
   const activeVerseRef = useRef<HTMLDivElement | null>(null);
+  const [mobileActiveSplitTab, setMobileActiveSplitTab] = useState<'primary' | 'secondary'>('primary');
 
   // Auto-scroll to active audio verse if enabled
   useEffect(() => {
@@ -215,13 +216,13 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
   return (
     <main 
       id="bible-reader-canvas"
-      className="flex-1 w-full min-h-[calc(100vh-4rem)] transition-colors duration-300 relative py-8 px-4 sm:px-8"
+      className="flex-1 w-full min-h-[calc(100vh-4rem)] transition-colors duration-300 relative pt-4 sm:pt-8 pb-32 sm:pb-24 px-3 sm:px-6 md:px-8"
       style={{
         backgroundColor: themeStyle.bg,
         color: themeStyle.text,
       }}
     >
-      {/* Floating Side Navigation Arrows (Desktop) */}
+      {/* Floating Side Navigation Arrows (Desktop Large Screens) */}
       <button
         id="desktop-prev-chapter-btn"
         onClick={onPrevChapter}
@@ -267,16 +268,16 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
         {/* Error State */}
         {!isLoading && error && (
           <div 
-            className="p-8 rounded-2xl border text-center space-y-4 my-12"
+            className="p-6 sm:p-8 rounded-2xl border text-center space-y-4 my-8 sm:my-12"
             style={{ backgroundColor: themeStyle.cardBg, borderColor: themeStyle.border }}
           >
             <Info className="w-8 h-8 mx-auto text-amber-600 opacity-80" />
-            <h3 className="font-serif font-bold text-lg">Unable to load passage</h3>
-            <p className="text-sm opacity-75 max-w-md mx-auto">{error}</p>
+            <h3 className="font-serif font-bold text-base sm:text-lg">Unable to load passage</h3>
+            <p className="text-xs sm:text-sm opacity-75 max-w-md mx-auto">{error}</p>
             <button
               id="retry-fetch-chapter-btn"
               onClick={onRetry}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-amber-700 text-white hover:opacity-90 transition-opacity shadow-xs"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-amber-700 text-white hover:opacity-90 transition-opacity shadow-xs active:scale-95"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Retry Scripture</span>
@@ -286,38 +287,67 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
 
         {/* Content View */}
         {!isLoading && primaryChapter && (
-          <div className="space-y-8 animate-in fade-in duration-300">
+          <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
             {/* Chapter Header */}
-            <div className="text-center pb-6 border-b space-y-2" style={{ borderColor: themeStyle.border }}>
-              <span className="text-xs uppercase font-semibold tracking-widest text-amber-600 dark:text-amber-400">
+            <div className="text-center pb-4 sm:pb-6 border-b space-y-1.5 sm:space-y-2" style={{ borderColor: themeStyle.border }}>
+              <span className="text-[10px] sm:text-xs uppercase font-semibold tracking-widest text-amber-600 dark:text-amber-400">
                 {currentBook.testament === 'OT' ? 'Old Testament' : 'New Testament'} • {currentBook.category}
               </span>
-              <h1 className="font-serif font-bold text-3xl sm:text-4xl md:text-5xl tracking-tight">
+              <h1 className="font-serif font-bold text-2xl sm:text-4xl md:text-5xl tracking-tight">
                 {currentBook.name} {currentChapterNum}
               </h1>
-              <div className="flex items-center justify-center gap-2 pt-1">
-                <span className="text-xs font-mono uppercase px-2 py-0.5 rounded border" style={{ borderColor: themeStyle.border }}>
+              <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 pt-1">
+                <span className="text-[11px] sm:text-xs font-mono uppercase px-2 py-0.5 rounded border" style={{ borderColor: themeStyle.border }}>
                   {primaryChapter.translation_name || primaryChapter.translation.toUpperCase()}
                 </span>
                 {settings.splitView && secondaryChapter && (
-                  <span className="text-xs font-mono uppercase px-2 py-0.5 rounded border text-amber-600 dark:text-amber-300" style={{ borderColor: themeStyle.border }}>
+                  <span className="text-[11px] sm:text-xs font-mono uppercase px-2 py-0.5 rounded border text-amber-600 dark:text-amber-300" style={{ borderColor: themeStyle.border }}>
                     vs. {secondaryChapter.translation_name || secondaryChapter.translation.toUpperCase()}
                   </span>
                 )}
               </div>
+
+              {/* Mobile Tab Switcher for Split View */}
+              {settings.splitView && secondaryChapter && (
+                <div className="md:hidden pt-3 flex justify-center">
+                  <div className="inline-flex p-1 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5">
+                    <button
+                      onClick={() => setMobileActiveSplitTab('primary')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        mobileActiveSplitTab === 'primary' 
+                          ? 'bg-amber-700 text-white shadow-xs' 
+                          : 'opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      {primaryChapter.translation_name || primaryChapter.translation.toUpperCase()}
+                    </button>
+                    <button
+                      onClick={() => setMobileActiveSplitTab('secondary')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        mobileActiveSplitTab === 'secondary' 
+                          ? 'bg-amber-700 text-white shadow-xs' 
+                          : 'opacity-70 hover:opacity-100'
+                      }`}
+                    >
+                      {secondaryChapter.translation_name || secondaryChapter.translation.toUpperCase()}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Split View (Parallel Translations) or Single View */}
             {settings.splitView && secondaryChapter ? (
               /* PARALLEL VIEW */
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Column 1: Primary Translation */}
-                <div className="space-y-4">
-                  <div className="sticky top-18 z-10 py-1 font-serif font-bold text-sm text-amber-700 dark:text-amber-400 border-b" style={{ borderColor: themeStyle.border, backgroundColor: themeStyle.bg }}>
-                    {primaryChapter.translation_name || primaryChapter.translation.toUpperCase()}
+                {/* Column 1: Primary Translation (hidden on mobile if secondary tab active) */}
+                <div className={`space-y-4 ${mobileActiveSplitTab === 'secondary' ? 'hidden md:block' : 'block'}`}>
+                  <div className="sticky top-16 z-10 py-1.5 px-2 rounded-lg font-serif font-bold text-xs sm:text-sm text-amber-700 dark:text-amber-400 border-b flex items-center justify-between" style={{ borderColor: themeStyle.border, backgroundColor: themeStyle.bg }}>
+                    <span>{primaryChapter.translation_name || primaryChapter.translation.toUpperCase()}</span>
+                    <span className="text-[10px] opacity-60 uppercase font-mono">Primary Version</span>
                   </div>
                   <div 
-                    className={`space-y-3 ${getFontFamilyClass()}`}
+                    className={`space-y-2.5 sm:space-y-3 ${getFontFamilyClass()}`}
                     style={{ fontSize: `${settings.fontSize}px`, lineHeight: settings.lineHeight }}
                   >
                     {primaryChapter.verses.map((verse) => {
@@ -333,7 +363,7 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
                           id={`verse-prim-${verse.verse}`}
                           ref={isAudioActive ? activeVerseRef : null}
                           onClick={() => onToggleVerseSelect(verse)}
-                          className={`group relative p-2 rounded-xl cursor-pointer transition-all ${
+                          className={`group relative p-2 sm:p-2.5 rounded-xl cursor-pointer transition-all ${
                             isSelected ? 'ring-2 ring-amber-600 shadow-xs' : 'hover:bg-black/5 dark:hover:bg-white/5'
                           } ${isAudioActive ? 'ring-2 ring-amber-500 bg-amber-500/15' : ''}`}
                           style={{
@@ -379,20 +409,21 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
                   </div>
                 </div>
 
-                {/* Column 2: Secondary Translation */}
-                <div className="space-y-4">
-                  <div className="sticky top-18 z-10 py-1 font-serif font-bold text-sm text-sky-700 dark:text-sky-400 border-b" style={{ borderColor: themeStyle.border, backgroundColor: themeStyle.bg }}>
-                    {secondaryChapter.translation_name || secondaryChapter.translation.toUpperCase()}
+                {/* Column 2: Secondary Translation (hidden on mobile if primary tab active) */}
+                <div className={`space-y-4 ${mobileActiveSplitTab === 'primary' ? 'hidden md:block' : 'block'}`}>
+                  <div className="sticky top-16 z-10 py-1.5 px-2 rounded-lg font-serif font-bold text-xs sm:text-sm text-sky-700 dark:text-sky-400 border-b flex items-center justify-between" style={{ borderColor: themeStyle.border, backgroundColor: themeStyle.bg }}>
+                    <span>{secondaryChapter.translation_name || secondaryChapter.translation.toUpperCase()}</span>
+                    <span className="text-[10px] opacity-60 uppercase font-mono">Parallel Version</span>
                   </div>
                   <div 
-                    className={`space-y-3 ${getFontFamilyClass()}`}
+                    className={`space-y-2.5 sm:space-y-3 ${getFontFamilyClass()}`}
                     style={{ fontSize: `${settings.fontSize}px`, lineHeight: settings.lineHeight }}
                   >
                     {secondaryChapter.verses.map((verse) => (
                       <div
                         key={`sec-${verse.verse}`}
                         id={`verse-sec-${verse.verse}`}
-                        className="p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                        className="p-2 sm:p-2.5 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                       >
                         {settings.showVerseNumbers && (
                           <sup className="font-sans font-bold text-xs mr-1.5 opacity-60 select-none text-sky-700 dark:text-sky-400">
@@ -417,7 +448,7 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
               >
                 {settings.viewMode === 'verse-by-verse' ? (
                   /* Verse by Verse List */
-                  <div className="space-y-3.5">
+                  <div className="space-y-2.5 sm:space-y-3.5">
                     {primaryChapter.verses.map((verse) => {
                       const highlight = getHighlightForVerse(verse.verse);
                       const isSelected = isVerseSelected(verse.verse);
@@ -431,7 +462,7 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
                           id={`verse-item-${verse.verse}`}
                           ref={isAudioActive ? activeVerseRef : null}
                           onClick={() => onToggleVerseSelect(verse)}
-                          className={`group relative p-2.5 sm:p-3 rounded-xl cursor-pointer transition-all duration-150 flex items-start gap-3 ${
+                          className={`group relative p-2 sm:p-3 rounded-xl cursor-pointer transition-all duration-150 flex items-start gap-2.5 sm:gap-3 ${
                             isSelected
                               ? 'ring-2 ring-amber-600 shadow-xs'
                               : 'hover:bg-black/5 dark:hover:bg-white/5'
@@ -441,7 +472,7 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
                           }}
                         >
                           {settings.showVerseNumbers && (
-                            <span className="font-sans font-bold text-xs pt-1 px-1.5 rounded bg-black/5 dark:bg-white/10 select-none text-amber-700 dark:text-amber-400 shrink-0">
+                            <span className="font-sans font-bold text-[11px] sm:text-xs pt-0.5 px-1.5 rounded bg-black/5 dark:bg-white/10 select-none text-amber-700 dark:text-amber-400 shrink-0">
                               {verse.verse}
                             </span>
                           )}
@@ -458,25 +489,27 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
                               {verse.text}
                             </span>
 
-                            {/* Badges */}
-                            <div className="inline-flex items-center gap-1.5 ml-2 align-middle">
-                              {isBookmarked && (
-                                <BookmarkIcon className="w-3.5 h-3.5 text-amber-600 fill-current inline opacity-90" />
-                              )}
-                              {note && (
-                                <button
-                                  id={`open-note-btn-${verse.verse}`}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onOpenNoteForVerse(verse.verse);
-                                  }}
-                                  className="inline-flex p-0.5 rounded hover:bg-amber-600/20 text-amber-700 dark:text-amber-300"
-                                  title={`Study Note: ${note.title}`}
-                                >
-                                  <FileText className="w-3.5 h-3.5" />
-                                </button>
-                              )}
-                            </div>
+                            {/* Badges for Bookmark and Notes */}
+                            {(isBookmarked || note) && (
+                              <div className="inline-flex items-center gap-1.5 ml-2 align-middle">
+                                {isBookmarked && (
+                                  <BookmarkIcon className="w-3.5 h-3.5 text-amber-600 fill-current inline opacity-90" />
+                                )}
+                                {note && (
+                                  <span
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onOpenNoteForVerse(verse.verse);
+                                    }}
+                                    className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] bg-amber-600/15 text-amber-700 dark:text-amber-300 font-sans font-medium"
+                                    title={`Note: ${note.title}`}
+                                  >
+                                    <FileText className="w-3 h-3" />
+                                    <span>Note</span>
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                       );
@@ -484,8 +517,8 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
                   </div>
                 ) : (
                   /* Continuous Paragraph Mode */
-                  <div className="space-y-4 text-justify">
-                    <p className="leading-relaxed">
+                  <div className="prose max-w-none">
+                    <p className="leading-loose text-justify text-balance">
                       {primaryChapter.verses.map((verse) => {
                         const highlight = getHighlightForVerse(verse.verse);
                         const isSelected = isVerseSelected(verse.verse);
@@ -496,7 +529,7 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
                         return (
                           <span
                             key={verse.verse}
-                            id={`verse-span-${verse.verse}`}
+                            id={`verse-inline-${verse.verse}`}
                             ref={isAudioActive ? activeVerseRef : null}
                             onClick={() => onToggleVerseSelect(verse)}
                             className={`inline cursor-pointer px-1 py-0.5 rounded transition-all duration-150 ${
@@ -545,15 +578,15 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
               </div>
             )}
 
-            {/* Bottom Chapter Navigation Footer */}
+            {/* Bottom Chapter Navigation Footer (Mobile Optimized Layout) */}
             <div 
-              className="pt-10 pb-16 flex flex-col sm:flex-row items-center justify-between gap-4 border-t"
+              className="pt-8 sm:pt-10 pb-6 grid grid-cols-1 sm:grid-cols-3 gap-3 border-t"
               style={{ borderColor: themeStyle.border }}
             >
               <button
                 id="footer-prev-chapter-btn"
                 onClick={onPrevChapter}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border font-serif font-semibold text-sm transition-all hover:scale-105 active:scale-95 shadow-xs"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border font-serif font-semibold text-xs sm:text-sm transition-all hover:scale-105 active:scale-95 shadow-xs"
                 style={{
                   backgroundColor: themeStyle.cardBg,
                   borderColor: themeStyle.border,
@@ -566,16 +599,16 @@ export const BibleReader: React.FC<BibleReaderProps> = ({
               <button
                 id="footer-ai-insights-btn"
                 onClick={onOpenAiStudy}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-amber-700/15 text-amber-700 dark:text-amber-300 hover:bg-amber-700/25 transition-colors"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-xs font-semibold bg-amber-700/15 text-amber-700 dark:text-amber-300 hover:bg-amber-700/25 transition-colors active:scale-95"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Chapter Commentary & Insights</span>
+                <Sparkles className="w-4 h-4" />
+                <span>AI Insights & Commentary</span>
               </button>
 
               <button
                 id="footer-next-chapter-btn"
                 onClick={onNextChapter}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border font-serif font-semibold text-sm transition-all hover:scale-105 active:scale-95 shadow-xs"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border font-serif font-semibold text-xs sm:text-sm transition-all hover:scale-105 active:scale-95 shadow-xs"
                 style={{
                   backgroundColor: themeStyle.cardBg,
                   borderColor: themeStyle.border,
