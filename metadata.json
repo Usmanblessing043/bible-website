@@ -1,0 +1,6 @@
+{
+  "name": "Scripture - Holy Bible Reader & Study Suite",
+  "description": "Comprehensive Holy Bible reader with multi-translation support, chapter and verse navigation, audio narration, study notes, highlights, reading plans, and AI-powered scripture study assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
